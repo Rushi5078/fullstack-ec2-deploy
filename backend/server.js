@@ -3,8 +3,10 @@ const hostname = '0.0.0.0';
 const port = 3000;
 
 const server = http.createServer((req, res) => {
-  res.statusCode = 200;
+  // ✅ Enable CORS
+  res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Content-Type', 'text/plain');
+  res.statusCode = 200;
   res.end('Hello from Backend!\n');
 });
 
