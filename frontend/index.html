@@ -6,5 +6,19 @@
 </head>
 <body>
   <h1>Frontend Deployed</h1>
+
+  <h2>Backend Response:</h2>
+  <div id="backend-response">Loading...</div>
+
+  <script>
+    fetch("http://13.233.212.148:3000/")
+      .then(response => response.text())
+      .then(data => {
+        document.getElementById("backend-response").innerText = data;
+      })
+      .catch(error => {
+        document.getElementById("backend-response").innerText = "Error: " + error;
+      });
+  </script>
 </body>
 </html>
