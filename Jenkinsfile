@@ -2,33 +2,44 @@ pipeline {
     agent any
 
     environment {
-        FRONTEND_IP = 'your.frontend.ip'
-        BACKEND_IP = 'your.backend.ip'
-        SSH_KEY = '/var/lib/jenkins/my-key.pem'
-        SSH_USER = 'ubuntu'
+        FRONTEND_IP = "13.233.245.253"
+        BACKEND_IP = "13.233.212.148"
+        SSH_KEY_PATH = "/var/lib/jenkins/.ssh/id_rsa"
+        USER = "ubuntu"
+        REPO_URL = "https://github.com/Rushi5078/fullstack-ec2-deploy.git"
     }
 
     stages {
-        stage('Clone Repo') {
+        stage('Clone Repository') {
             steps {
-                git branch: 'main', url: 'https://github.com/YOUR_USERNAME/my-fullstack-app.git'
+                git url: "${REPO_URL}", branch: 'main'
             }
         }
 
         stage('Deploy Frontend') {
             steps {
+                echo "Deploying frontend to ${FRONTEND_IP}..."
                 sh '''
-                scp -o StrictHostKeyChecking=no -i $SSH_KEY frontend/index.html $SSH_USER@$FRONTEND_IP:/tmp/index.html
-                ssh -o StrictHostKeyChecking=no -i $SSH_KEY $SSH_USER@$FRONTEND_IP "sudo mv /tmp/index.html /var/www/html/index.html && sudo systemctl restart nginx"
+                    scp -o StrictHostKeyChecking=no -i ${SSH_KEY_PATH} -r frontend/* ${USER}@${FRONTEND_IP}:/var/www/html/
                 '''
             }
         }
 
         stage('Deploy Backend') {
             steps {
+                echo "Deploying backend to ${BACKEND_IP}..."
                 sh '''
-                scp -o StrictHostKeyChecking=no -i $SSH_KEY backend/index.js $SSH_USER@$BACKEND_IP:/home/ubuntu/index.js
-                ssh -o StrictHostKeyChecking=no -i $SSH_KEY $SSH_USER@$BACKEND_IP "pkill node || true && nohup node /home/ubuntu/index.js &"
+                    ssh -o StrictHostKeyChecking=no -i ${SSH_KEY_PATH} ${USER}@${BACKEND_IP} << EOF
+                        sudo apt update -y
+                        sudo apt install -y nodejs npm
+                        mkdir -p ~/backend
+                        exit
+                    EOF
+                    scp -o StrictHostKeyChecking=no -i ${SSH_KEY_PATH} -r backend/* ${USER}@${BACKEND_IP}:~/backend/
+                    ssh -o StrictHostKeyChecking=no -i ${SSH_KEY_PATH} ${USER}@${BACKEND_IP} << EOF
+                        cd ~/backend
+                        nohup node index.js > output.log 2>&1 &
+                    EOF
                 '''
             }
         }
