@@ -1,24 +1,41 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Frontend</title>
-  <link rel="stylesheet" href="styles.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Fullstack App</title>
+  <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <h1>Frontend Deployed</h1>
+  <div class="container">
+    <h1>🚀 Welcome to the Fullstack App</h1>
+    <p>This frontend is running on its own EC2 instance.</p>
 
-  <h2>Backend Response:</h2>
-  <div id="backend-response">Loading...</div>
+    <div id="backend-response" class="response-box">
+      <p>Loading backend response...</p>
+    </div>
+
+    <button onclick="getBackendData()">🔄 Refresh Backend Response</button>
+  </div>
 
   <script>
-    fetch("http://13.233.212.148:3000/")
-      .then(response => response.text())
-      .then(data => {
-        document.getElementById("backend-response").innerText = data;
-      })
-      .catch(error => {
-        document.getElementById("backend-response").innerText = "Error: " + error;
-      });
+    const backendUrl = "http://13.233.212.148:3000";
+
+    async function getBackendData() {
+      const resBox = document.getElementById("backend-response");
+      resBox.innerHTML = "<p>Fetching data...</p>";
+
+      try {
+        const res = await fetch(backendUrl);
+        if (!res.ok) throw new Error("Network response was not ok");
+        const text = await res.text();
+        resBox.innerHTML = `<p><strong>Backend Says:</strong> ${text}</p>`;
+      } catch (err) {
+        resBox.innerHTML = `<p style="color: red;"><strong>Error:</strong> ${err}</p>`;
+      }
+    }
+
+    window.onload = getBackendData;
   </script>
 </body>
 </html>
